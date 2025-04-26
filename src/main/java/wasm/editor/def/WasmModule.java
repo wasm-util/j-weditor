@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author Alan Massom <https://github.com/SavionsSw>
+ * @author Alan Massom <https://github.com/SavoinsSw>
  */
 public class WasmModule extends TypeAble {
 
@@ -23,30 +23,7 @@ public class WasmModule extends TypeAble {
 
     @Override
     public void parse(ByteArrayInputStream inputStream) throws IOException {
-        if (parseTypeAble(inputStream, UnInterpretedInteger32Value.class).get() != Constants.WASM_BINARY_MAGIC_NUMBER) {
-            throw new IOException("Invalid WASM_BINARY_MAGIC from wasm input.");
-        }
-        if (parseTypeAble(inputStream, UnInterpretedInteger32Value.class).get() != Constants.WASM_BINARY_VERSION_NUMBER) {
-            throw new IOException("Invalid WASM_BINARY_VERSION from wasm input.");
-        }
-        int sectionCode;
-        while((sectionCode = inputStream.read()) != -1) {
-            final BigInteger sectionSize = parseTypeAble(inputStream, Unsigned128LEB32Value.class).get();
-            if (sectionSize.intValue() < 0) {
-                throw new IOException("Incorrect section size of 0");
-            }
-            final byte[] sectionBytes = new byte[sectionSize.intValue()];
-            if (inputStream.read(sectionBytes) < sectionSize.intValue()) {
-                throw new IOException(String.format("Failed to read section (code: %s) bytes with size %d", Parser.toHex(sectionCode), sectionSize));
-            }
-            final Class<? extends TypeAble> sectionClass = SectionEnum.getParserClass(sectionCode);
-            if (sectionClass == null) {
-                throw new IOException(String.format("Cannot parse section, unsupported section id: %s", Parser.toHex(sectionCode)));
-            }
-            final TypeAble section = parseTypeAble(new ByteArrayInputStream(sectionBytes), sectionClass);
-            sections.add(section);
-        }
-
+        if (parseTypeAble(inputStream, UnInterpretedInteger32Value.class).get() != Constants.WASM_BINARY_MAGIC_NUMBER) {            throw new IOException("Invalid WASM_BINARY_MAGIC from wasm input.");        }        if (parseTypeAble(inputStream, UnInterpretedInteger32Value.class).get() != Constants.WASM_BINARY_VERSION_NUMBER) {            throw new IOException("Invalid WASM_BINARY_VERSION from wasm input.");        }        int sectionCode;        while((sectionCode = inputStream.read()) != -1) {            final BigInteger sectionSize = parseTypeAble(inputStream, Unsigned128LEB32Value.class).get();            if (sectionSize.intValue() < 0) {                throw new IOException("Incorrect section size of 0");            }            final byte[] sectionBytes = new byte[sectionSize.intValue()];            if (inputStream.read(sectionBytes) < sectionSize.intValue()) {                throw new IOException(String.format("Failed to read section (code: %s) bytes with size %d", Parser.toHex(sectionCode), sectionSize));            }            final Class<? extends TypeAble> sectionClass = SectionEnum.getParserClass(sectionCode);            if (sectionClass == null) {                throw new IOException(String.format("Cannot parse section, unsupported section id: %s", Parser.toHex(sectionCode)));            }            final TypeAble section = parseTypeAble(new ByteArrayInputStream(sectionBytes), sectionClass);            sections.add(section);        }
     }
 
     @Override
